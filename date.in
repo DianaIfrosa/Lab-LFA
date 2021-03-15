@@ -1,0 +1,23 @@
+#
+# comment l i n e s ( s k i p them )
+#
+Sigma :
+01
+110
+0001
+End
+#
+# comment l i n e s ( s k i p them )
+#
+States:
+1,S
+2
+3,F
+End
+#
+# comment lines
+#
+Transitions:
+1,01,2
+2,110,3
+End
