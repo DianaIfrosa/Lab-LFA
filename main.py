@@ -1,129 +1,130 @@
 import sys
 
-#date
-lista=[]
-#lista de cuvinte
-cuvinte=[]
-#dictionar de stari
-stari={}
+#input data structures
+list=[]
+#list of words
+words=[]
+#dictionary of states
+states={}
 
-stari["S"]=[]
-stari["N"]=[]
-stari["F"]=[]
+states["S"]=[] # start
+states["N"]=[] # normal
+states["F"]=[] # finish
 
-#ca sa gasesc mai usor starile la validare
-stari_neclasificate=set()
+#store them in a set for easier validation
+all_states=set()
 
-tranzitii=[]
+transitions=[]
 
-def Citeste():
+def Read():
     f=open("date.in")
 
-    #evita comentariile
-    for linie in f:
-        if linie[0]!='#':
-         lista.append(linie.strip())
+    #skip comments
+    for line in f:
+        if line[0]!='#':
+         list.append(line.strip())
 
     f.close()
 
     poz=0
-    n=len(lista)
+    n=len(list)
 
     while poz<n:
-        if lista[poz].find("Sigma")!=-1:
+        if list[poz].find("Sigma")!=-1:
             poz+=1
-            while lista[poz]!="End":
-                cuvinte.append(lista[poz])
+            while list[poz]!="End":
+                words.append(list[poz])
                 poz+=1
-            #sunt cu poz pe end
+            #current position = end
             poz+=1
 
-        if lista[poz].find("States")!=-1:
+        if list[poz].find("States")!=-1:
             poz+=1
-            #construiesc dictionar cu cheile S,F,N-normale si adaug starile
-            while lista[poz]!="End":
-                bucati=[]
-                bucati=lista[poz].split(",")
-                stari_neclasificate.add(bucati[0])
-                if len(bucati)==1:
-                    stari["N"].append(bucati[0])
-                elif len(bucati)==2:
-                        if bucati[1].strip()=="S":
-                            stari["S"].append(bucati[0])
-                        elif bucati[1].strip()=="F":
-                            stari["F"].append(bucati[0])
-                else: # are sigur lungime 3 -> stare intiala si stare finala
-                    stari["F"].append(bucati[0])
-                    stari["S"].append(bucati[0])
+            #dictionary with keys S,F,N-normal and add states
+            while list[poz]!="End":
+                transition_tuple=[]
+                transition_tuple=list[poz].split(",")
+                all_states.add(transition_tuple[0])
+                if len(transition_tuple)==1:
+                    states["N"].append(transition_tuple[0])
+                elif len(transition_tuple)==2:
+                        if transition_tuple[1].strip()=="S":
+                            states["S"].append(transition_tuple[0])
+                        elif transition_tuple[1].strip()=="F":
+                            states["F"].append(transition_tuple[0])
+                else: #length is 3 so initial and final state
+                    states["F"].append(transition_tuple[0])
+                    states["S"].append(transition_tuple[0])
 
                 poz+=1
-            poz+=1 #sar peste end
+            poz+=1 #skip "end"
 
-        if lista[poz].find("Transitions") != -1:
+        if list[poz].find("Transitions") != -1:
             poz+=1
-            while lista[poz] != "End":
+            while list[poz] != "End":
 
-                bucati=lista[poz].split(",")
-                tranzitii.append(tuple(bucati))
+                transition_tuple=list[poz].split(",")
+                transitions.append(tuple(transition_tuple))
 
                 poz+=1
             poz+=1
         poz+=1
 
-def AfisareDate():
-    print("Starile introduse sunt:", stari)
-    print("Tranzitiile introduse sunt:", tranzitii)
-    print("Cuvintele introduse sunt:",  cuvinte)
+def Output():
+    print("The states are:", states)
+    print("The transitions are:", transitions)
+    print("The words are:",  words)
 
-def Validare():
-    #are mai multe stari intiale
-    if len(stari["S"])!=1:
-        print("Exista mai multe stari initiale!")
+def Validate():
+    #many initial states
+    if len(states["S"])!=1:
+        print("There are many initial states!")
         return 0
-    #nu are stare finala
-    if len(stari["F"])==0:
-        print("Nu exista stare finala!")
+    #no final state
+    if len(states["F"])==0:
+        print("There is no final state!")
         return 0
-    for tranz in tranzitii:
-        if tranz[1] not in cuvinte:
-            print("A fost introdus un cuvant invalid!")
+    for trans in transitions:
+        if trans[1] not in words:
+            print("Invalid word!")
             return 0
-        if tranz[0] not in stari_neclasificate:
-            print("A fost introdusa o stare invalida!")
+        if trans[0] not in all_states:
+            print("Invalid state!")
             return 0
-        if tranz[2] not in stari_neclasificate:
-            print("A fost introdusa o stare invalida!")
+        if trans[2] not in all_states:
+            print("Invalid state!")
             return 0
 
     return 1
 
-def ValidareDate():
+def ValidateInput():
 
-  if Validare()==0:
-    print("Datele nu sunt valide!")
+  if Validate()==0:
+    print("Input is not valid!")
   else:
-    print("Datele sunt valide!")
+    print("Valid input!")
+    DFA()
 
 
-def Verifica():
+def DFA():
 
     s=sys.argv[1:]
-    #s=input("cuvant:")
+    #s=input("word:")
     lg=len(s)
-    starecurenta=stari["S"][0]
+    current_state=states["S"][0]
     i=0
-    rej=0 #daca a fost rejected de la abort
-    lg_tranz=len(tranzitii)
+    rej=0 #whether it was aborted or not
+    lg_tranz=len(transitions) #how many transitions i have
     ok=0
     while i<lg:
-      ok=0 #daca gasesc o tranzitie buna sau nu
+      ok=0 #whether i find a good transitions or not
       for j in range(lg_tranz):
-          if tranzitii[j][0]==starecurenta: # am identificat o tranzitie care pleaca din starea mea curenta
-             if s[i:].find(tranzitii[j][1])==0: #in aceasta tranzitie urmeaza o secventa/cuvant din s
-                 # am gasit tranzitia
+          if transitions[j][0]==current_state: # i have found a transition that starts from my current state
+             if s[i:].find(transitions[j][1])==0: #verify if the word from transition is what i need
+                 #the transition is valid
                 ok=1
-                starecurenta=tranzitii[j][2] #trec la urmatoarea tranzitie
-                i=i+len(tranzitii[j][1]) #sar cuvantul
+                current_state=transitions[j][2] #go to the next transition
+                i=i+len(transitions[j][1]) #skip the previous word
                 break
 
       if ok==0: #abort
@@ -131,16 +132,16 @@ def Verifica():
           rej=1
           break
 
-    if rej==0 and starecurenta not in stari["F"]:
+    if rej==0 and current_state not in states["F"]:
         print("Rejected")
-    elif starecurenta in stari["F"]:
+    elif current_state in states["F"]:
         print("Accepted")
 
 
 #main
-Citeste()
-AfisareDate()
-ValidareDate()
-Verifica()
+Read()
+Output()
+ValidateInput()
+
 
 
