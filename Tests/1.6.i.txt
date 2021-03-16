@@ -1,0 +1,23 @@
+#
+# comment lines ( skip them )
+#
+Sigma:
+    0
+    1
+End
+#
+# comment l i n e s ( s k i p them )
+#
+States:
+    1,S,F
+    2,F
+ 
+End
+#
+# comment l i n e s ( s k i p them )
+#
+Transitions:
+ 1,1,2
+ 2,0,1
+ 2,1,1
+End
