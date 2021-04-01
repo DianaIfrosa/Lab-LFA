@@ -137,11 +137,17 @@ def DFA():
     elif current_state in states["F"]:
         print("Accepted")
 
+def main():
+    Read()
+    Output()
+    ValidateInput()
+    
+if __name__ == "__main__":
+    main()
 
-#main
-Read()
-Output()
-ValidateInput()
+
+
+    
 
 
 
