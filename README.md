@@ -1,4 +1,3 @@
-# Lab-LFA
+# Limbaje formale si automate
 
-Formal Languages and Automata theory.  
-1st year, 2nd semester.
+Python. Anul 1, semestrul 2
